@@ -30,7 +30,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "Bot is running 24/7 with Payment Features!"
+    return "Bot is running 24/7 with Payment Features (Bug Fixed)!"
 
 def run():
     app.run(host='0.0.0.0', port=8080)
@@ -62,7 +62,6 @@ def main_menu_keyboard():
         KeyboardButton('🚚 ပို့ဆောင်မှု (Delivery)'),
         KeyboardButton('❓ အမေးများသော မေးခွန်းများ (FAQ)')
     )
-    # Payment ခလုတ်အသစ် ထပ်တိုးထားသည်
     markup.add(
         KeyboardButton('💳 ငွေပေးချေရန်'),
         KeyboardButton('📝 အကြံပြုရန် / Feedback')
@@ -141,23 +140,23 @@ def handle_text(message):
         bot.send_message(chat_id, "👇 လူကြီးမင်း ကြည့်ရှုလိုသော မီနူး အမျိုးအစားကို ရွေးချယ်ပါ-", reply_markup=markup)
 
     elif text == '🎉 ပရိုမိုးရှင်း':
-        bot.send_chat_action(chat_id, 'upload_photo')
-        img_url = "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60"
-        promo_text = (
-            "🎉 **ယခုလအတွက် အထူး ပရိုမိုးရှင်းများ** 🎉\n\n"
-            "🎁 **Promo 1:** ကြက်ကင် (၁) ကောင် ဝယ်ယူပါက အအေး (၁) ခွက် အခမဲ့ ရရှိပါမည်။\n"
-            "🎁 **Promo 2:** စုစုပေါင်း ၅၀,၀၀၀ ကျပ်နှင့်အထက် ဝယ်ယူပါက (10% Discount) ရရှိပါမည်။\n"
-            "🎁 **Promo 3:** မွေးနေ့ရှင်များအတွက် ဆိုင်သို့လာရောက်စားသုံးပါက အချိုပွဲ အခမဲ့ ဆက်သပေးပါမည် (မှတ်ပုံတင်ပြရန်)။\n\n"
-            "*(ကာလ - ယခုလကုန်အထိသာ)*"
-        )
-        bot.send_photo(chat_id, img_url, caption=promo_text, parse_mode='Markdown')
+        try:
+            bot.send_chat_action(chat_id, 'upload_photo')
+            img_url = "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=60"
+            promo_text = (
+                "🎉 **ယခုလအတွက် အထူး ပရိုမိုးရှင်းများ** 🎉\n\n"
+                "🎁 **Promo 1:** ကြက်ကင် (၁) ကောင် ဝယ်ယူပါက အအေး (၁) ခွက် အခမဲ့ ရရှိပါမည်။\n"
+                "🎁 **Promo 2:** စုစုပေါင်း ၅၀,၀၀၀ ကျပ်နှင့်အထက် ဝယ်ယူပါက (10% Discount) ရရှိပါမည်။\n"
+                "🎁 **Promo 3:** မွေးနေ့ရှင်များအတွက် ဆိုင်သို့လာရောက်စားသုံးပါက အချိုပွဲ အခမဲ့ ဆက်သပေးပါမည် (မှတ်ပုံတင်ပြရန်)။\n\n"
+                "*(ကာလ - ယခုလကုန်အထိသာ)*"
+            )
+            bot.send_photo(chat_id, img_url, caption=promo_text, parse_mode='Markdown')
+        except Exception:
+            bot.send_message(chat_id, promo_text, parse_mode='Markdown')
 
-    # စားပွဲ ၂၀ အထိ တိုးထားပါသည်
     elif text == '📅 စားပွဲကြိုတင်မှာယူရန်':
         markup = InlineKeyboardMarkup(row_width=4)
-        tables = []
-        for i in range(1, 21): 
-            tables.append(InlineKeyboardButton(f"စားပွဲ {i}", callback_data=f"book_table_{i}"))
+        tables = [InlineKeyboardButton(f"စားပွဲ {i}", callback_data=f"book_table_{i}") for i in range(1, 21)]
         markup.add(*tables)
         
         bot.send_message(
@@ -167,7 +166,6 @@ def handle_text(message):
             parse_mode='Markdown'
         )
 
-    # Delivery ပိတ်သိမ်းကြောင်း ပြင်ဆင်ထားသည်
     elif text == '🚚 ပို့ဆောင်မှု (Delivery)':
         reply_msg = (
             "🚚 **Delivery ဝန်ဆောင်မှု အချက်အလက်များ**\n\n"
@@ -175,7 +173,6 @@ def handle_text(message):
         )
         bot.send_message(chat_id, reply_msg, parse_mode='Markdown')
 
-    # မေးခွန်းအသစ်များ ထပ်တိုးထားသည်
     elif text == '❓ အမေးများသော မေးခွန်းများ (FAQ)':
         reply_msg = (
             "❓ **အမေးများသော မေးခွန်းများ**\n\n"
@@ -190,7 +187,6 @@ def handle_text(message):
         )
         bot.send_message(chat_id, reply_msg, parse_mode='Markdown')
 
-    # Payment Feature အသစ်
     elif text == '💳 ငွေပေးချေရန်':
         markup = InlineKeyboardMarkup(row_width=2)
         markup.add(
@@ -216,43 +212,44 @@ def handle_text(message):
         bot.register_next_step_handler(msg, process_feedback)
 
 # ---------------------------------------------------------
-# Payment Callbacks (QR နှင့် ဖုန်းနံပါတ်များ)
+# Payment Callbacks (Error ကင်းရှင်းစေရန် Try-Except ထည့်ထားသည်)
 # ---------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith('pay_'))
 def callback_payment(call):
+    bot.answer_callback_query(call.id) # ခလုတ် Loading မဖြစ်အောင် ချက်ချင်းရပ်မည်
     chat_id = call.message.chat.id
     method = call.data.split('_')[1]
     
     slip_markup = InlineKeyboardMarkup()
     slip_markup.add(InlineKeyboardButton("🧾 ငွေလွှဲပြေစာ (Slip) ပို့ရန်", callback_data="action_send_slip"))
 
-    # သတိပြုရန် - အောက်ပါ QR link နေရာများတွင် သင့်ဆိုင်၏ QR ပုံ link များ ပြောင်းထည့်ပါ။
     if method == "kpay":
-        qr_url = "https://cdn.phototourl.com/member/2026-09-25-000873aa-a533-48c4-9723-22ffb4bdc5ec.jpg" 
-        desc = "💳 **KBZPay (KPay) ဖြင့်ပေးချေရန်**\n\n👤 Name: yee yee cho(ဥပမာအမည် ပြင်ပါ)\n📱 Phone: `09250597667` (နှိပ်၍ Copy ကူးပါ)\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
-    
+        qr_url = "https://via.placeholder.com/500x500.png?text=KBZPay+QRhttps://cdn.phototourl.com/member/2026-09-25-000873aa-a533-48c4-9723-22ffb4bdc5ec.jpg" 
+        desc = "💳 **KBZPay (KPay) ဖြင့်ပေးချေရန်**\n\n👤 Name: yee yee cho\n📱 Phone: `09250597667` (နှိပ်၍ Copy ကူးပါ)\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
     elif method == "wave":
         qr_url = "https://cdn.phototourl.com/member/2026-09-25-c3c4312c-1261-46a7-9341-7a42072afeb7.jpg"
         desc = "🌊 **WavePay ဖြင့်ပေးချေရန်**\n\n👤 Name: yee yee cho\n📱 Phone: `09675494412`\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
-    
     elif method == "cb":
         qr_url = "https://via.placeholder.com/500x500.png?text=CB+Pay+QR"
-        desc = "🏦 **CB Pay ဖြင့်ပေးချေရန်**\n\n👤 Name: U u\n📱 Phone: `09123456789`\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
-    
+        desc = "🏦 **CB Pay ဖြင့်ပေးချေရန်**\n\n👤 Name: U Kyaw\n📱 Phone: `09123456789`\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
     elif method == "aya":
-        qr_url = "https://cdn.phototourl.com/member/2026-09-25-43ae1131-867f-4b6c-8662-9f264704ade3.jpg"
-        desc = "🔴 **AYA Pay ဖြင့်ပေးချေရန်**\n\n👤 Name: pyae phyo aung\n📱 Phone: `09977466809`\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
+        qr_url = "https://via.placeholder.com/500x500.png?text=AYA+Pay+QR"
+        desc = "🔴 **AYA Pay ဖြင့်ပေးချေရန်**\n\n👤 Name: U Kyaw\n📱 Phone: `09123456789`\n\nအထက်ပါ ဖုန်းနံပါတ် သို့မဟုတ် အောက်ပါ QR Code ကို Scan ဖတ်၍ ပေးချေနိုင်ပါသည်။ ပြီးပါက Slip ပြန်ပို့ပေးပါခင်ဗျာ။"
     else:
         return
 
-    bot.send_photo(chat_id, qr_url, caption=desc, reply_markup=slip_markup, parse_mode='Markdown')
-    bot.answer_callback_query(call.id)
+    # ပုံဆွဲယူလို့ Error တက်ရင် စာသက်သက်သာ ပို့ပေးမည် (ခလုတ်ဆက်အလုပ်လုပ်မည်)
+    try:
+        bot.send_photo(chat_id, qr_url, caption=desc, reply_markup=slip_markup, parse_mode='Markdown')
+    except Exception:
+        bot.send_message(chat_id, desc, reply_markup=slip_markup, parse_mode='Markdown')
 
 # ---------------------------------------------------------
 # Slip ပေးပို့ခြင်း အပိုင်း
 # ---------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data == "action_send_slip")
 def callback_send_slip(call):
+    bot.answer_callback_query(call.id)
     chat_id = call.message.chat.id
     msg = bot.send_message(
         chat_id, 
@@ -261,14 +258,12 @@ def callback_send_slip(call):
         parse_mode='Markdown'
     )
     bot.register_next_step_handler(msg, process_slip_upload)
-    bot.answer_callback_query(call.id)
 
 def process_slip_upload(message):
     if message.text == '❌ ပယ်ဖျက်မည်':
         bot.send_message(message.chat.id, "ငွေလွှဲပြေစာ ပေးပို့ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။", reply_markup=main_menu_keyboard())
         return
 
-    # ဓာတ်ပုံ ပို့မပို့ စစ်ဆေးခြင်း
     if message.photo:
         admin_msg = (
             f"🧾 **ငွေလွှဲပြေစာ (Slip) အသစ် ဝင်လာပါပြီ**\n\n"
@@ -276,72 +271,69 @@ def process_slip_upload(message):
             f"🆔 ID: `{message.from_user.id}`"
         )
         try:
-            # Admin ဆီသို့ အချက်အလက်နှင့် Slip ပုံကို Forward လုပ်ပေးမည်
             bot.send_message(6146598194, admin_msg, parse_mode='Markdown')
             bot.forward_message(6146598194, message.chat.id, message.message_id)
-            
             bot.reply_to(message, "✅ ငွေလွှဲပြေစာ လက်ခံရရှိပါပြီ။ ဆိုင်မှ အတည်ပြုပြီးပါက အော်ဒါစီစဥ်ပေးပါမည်။ ကျေးဇူးတင်ပါတယ်ခင်ဗျာ။", reply_markup=main_menu_keyboard())
         except Exception as e:
             logging.error(f"Slip Error: {e}")
             bot.reply_to(message, "⚠️ Error ဖြစ်ပေါ်နေပါသည်။ Admin ID မှန်ကန်မှုရှိမရှိ စစ်ဆေးပါ။", reply_markup=main_menu_keyboard())
     else:
-        # ဓာတ်ပုံမဟုတ်ဘဲ စာပို့လာပါက ပြန်တောင်းမည်
-        msg = bot.send_message(
-            message.chat.id, 
-            "⚠️ ကျေးဇူးပြု၍ ဓာတ်ပုံ (Screenshot) ကိုသာ ပေးပို့ပါ။ ပြန်လည်ပေးပို့ပေးပါခင်ဗျာ။", 
-            reply_markup=cancel_keyboard()
-        )
+        msg = bot.send_message(message.chat.id, "⚠️ ကျေးဇူးပြု၍ ဓာတ်ပုံ (Screenshot) ကိုသာ ပေးပို့ပါ။ ပြန်လည်ပေးပို့ပေးပါခင်ဗျာ။", reply_markup=cancel_keyboard())
         bot.register_next_step_handler(msg, process_slip_upload)
 
 # ---------------------------------------------------------
-# Menu Categories Callbacks 
+# Menu Categories Callbacks (Error ကင်းရှင်းစေရန် Try-Except ထည့်ထားသည်)
 # ---------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith('cat_'))
 def callback_menu_categories(call):
+    bot.answer_callback_query(call.id)
     chat_id = call.message.chat.id
     order_markup = InlineKeyboardMarkup()
     order_markup.add(InlineKeyboardButton("🛒 ယခုမှာယူမည် (Order Now)", callback_data="action_order"))
 
     if call.data == "cat_drinks":
-        img_url = "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=60"
+        img_url = "https://cdn.phototourl.com/member/2026-09-25-b3898d21-b992-4ade-a2c6-b9abb26429ca.jpg"
         desc = "🥤 **အအေး မျိုးစုံ**\n- ကော်ဖီ / တီး\n- သစ်သီးဖျော်ရည်များ\n- ဆိုဒါဖျော်ရည်များ"
     elif call.data == "cat_chicken":
-        img_url = "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?auto=format&fit=crop&w=500&q=60"
-        desc = "🍗 **ကြက်ကင်**\n- ပျားရည်ဆမ်း ကြက်ကင်\n- ပုံမှန် ကြက်ကင်"
+        img_url = "https://cdn.phototourl.com/member/2026-09-25-e19d6a86-f847-4097-8cbb-3da82388803f.jpg"
+        desc = "🍗 **ကြက်ကင်**\n- ကြက်ကြာါ  ကြက်ကင်\n- ပုံမှန် ကြက်ကင်"
     elif call.data == "cat_salad":
-        img_url = "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=60"
+        img_url = "https://cdn.phototourl.com/member/2026-09-25-d38f2349-6a38-4848-b08e-7412ed97be4d.jpg"
         desc = "🥗 **အသုတ်စုံများ**\n- ခေါက်ဆွဲသုတ်\n- ပဲပြားသုတ်\n- တို့ဘူးသုပ်အမျိုးမျိုး"
     elif call.data == "cat_rice":
-        img_url = "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=60"
+        img_url = "https://cdn.phototourl.com/member/2026-09-26-ead7e5af-f8c0-457a-ac49-bba55b37d9f7.jpg"
         desc = "🍚 **ထမင်းနှင့် ဟင်းလျာ**\n- ကြက်ဆီထမင်း\n- ဝက်သားနီချက်\n- ထမင်းကြော်အမျိုးမျိုး"
     elif call.data == "cat_noodle":
-        img_url = "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=500&q=60"
+        img_url = "https://cdn.phototourl.com/member/2026-09-26-ead7e5af-f8c0-457a-ac49-bba55b37d9f7.jpg"
         desc = "🍜 **ခေါက်ဆွဲ/ကြာဆံ**\n- ရှမ်းခေါက်ဆွဲ\n- မြေအိုးမြီးရှည်\n- ကြာဆံကြော်"
     elif call.data == "cat_dessert":
-        img_url = "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=500&q=60"
+        img_url = "https://cdn.phototourl.com/member/2026-09-26-ead7e5af-f8c0-457a-ac49-bba55b37d9f7.jpg"
         desc = "🍰 **အချိုပွဲ**\n- ရေခဲမုန့်\n- သစ်သီးစုံပွဲ\n- ကိတ်မုန့်"
     else:
         return
 
-    bot.send_photo(chat_id, img_url, caption=desc, reply_markup=order_markup, parse_mode='Markdown')
-    bot.answer_callback_query(call.id)
+    try:
+        bot.send_photo(chat_id, img_url, caption=desc, reply_markup=order_markup, parse_mode='Markdown')
+    except Exception:
+        bot.send_message(chat_id, desc, reply_markup=order_markup, parse_mode='Markdown')
 
 # ---------------------------------------------------------
-# Table Booking Callback (စားပွဲ ရွေးချယ်ခြင်း)
+# Table Booking Callback (Lambda ဖြင့် ပြင်ဆင်ထားသည်)
 # ---------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data.startswith('book_table_'))
 def callback_book_table(call):
+    bot.answer_callback_query(call.id)
     table_no = call.data.split('_')[2]
     msg = bot.send_message(
         call.message.chat.id, 
         f"✅ **(စားပွဲ နံပါတ် - {table_no})** ကို ရွေးချယ်လိုက်ပါသည်။\n\n"
-        "လူကြီးမင်း၏ **အမည်၊ ဖုန်းနံပါတ်၊ လာရောက်မည့် အချိန် နှင့် လူအရေအတွက်** ကို အောက်တွင် ရိုက်ပို့ပေးပါခင်ဗျာ။\n\n"
-        "*(ဥပမာ - ဦးဦး၊ 0912345678၊ ညနေ ၅ နာရီ၊ ၄ ယောက်)*", 
+        "လူကြီးမင်း၏ **အမည်၊ ဖုန်းနံပါတ်၊ လာရောက်မည့် အချိန် နှင့် လူအရေအတွက်** ကို အောက်တွင် ရိုက်ပို့ပေးပါခင်ဗျာ。\n\n"
+        "*(ဥပမာ - ဦးကျော်၊ 0912345678၊ ညနေ ၅ နာရီ၊ ၄ ယောက်)*", 
         reply_markup=cancel_keyboard(),
         parse_mode='Markdown'
     )
-    bot.register_next_step_handler(msg, process_booking, table_no)
-    bot.answer_callback_query(call.id)
+    # Lambda function ကို အသုံးပြု၍ Argument မှန်ကန်စွာ ပေးပို့ခြင်း
+    bot.register_next_step_handler(msg, lambda m: process_booking(m, table_no))
 
 def process_booking(message, table_no):
     if message.text == '❌ ပယ်ဖျက်မည်':
@@ -355,7 +347,7 @@ def process_booking(message, table_no):
         f"📝 အသေးစိတ်:\n{message.text}"
     )
     try:
-        bot.send_message(ADMIN_CHAT_ID, admin_msg, parse_mode='Markdown')
+        bot.send_message(6146598194, admin_msg, parse_mode='Markdown')
         bot.reply_to(message, f"✅ (စားပွဲ {table_no}) အတွက် Booking တင်ခြင်း အောင်မြင်ပါသည်။ ဆိုင်မှ ပြန်လည်အတည်ပြု ဆက်သွယ်ပေးပါမည်။", reply_markup=main_menu_keyboard())
     except Exception as e:
         logging.error(f"Booking Error: {e}")
@@ -366,6 +358,7 @@ def process_booking(message, table_no):
 # ---------------------------------------------------------
 @bot.callback_query_handler(func=lambda call: call.data == "action_order")
 def callback_order(call):
+    bot.answer_callback_query(call.id)
     chat_id = call.message.chat.id
     msg = bot.send_message(
         chat_id, 
@@ -374,7 +367,6 @@ def callback_order(call):
         parse_mode='Markdown'
     )
     bot.register_next_step_handler(msg, process_order)
-    bot.answer_callback_query(call.id)
 
 def process_order(message):
     if message.text == '❌ ပယ်ဖျက်မည်':
@@ -406,6 +398,7 @@ def process_order(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('status_'))
 def handle_order_status(call):
+    bot.answer_callback_query(call.id)
     data = call.data.split('_')
     action = data[1]
     customer_id = data[2]
@@ -416,8 +409,6 @@ def handle_order_status(call):
     elif action == "reject":
         bot.send_message(customer_id, "⚠️ **တောင်းပန်အပ်ပါသည်**\nလူကြီးမင်း၏ အော်ဒါမှာ ပစ္စည်းကုန်သွားခြင်း (သို့) ဆိုင်ပိတ်သွားခြင်းကြောင့် လက်မခံနိုင်တော့ပါခင်ဗျာ။")
         bot.edit_message_text(f"{call.message.text}\n\n🔴 **[Status: ပယ်ဖျက်လိုက်သည်]**", call.message.chat.id, call.message.message_id)
-
-    bot.answer_callback_query(call.id)
 
 def process_feedback(message):
     if message.text == '❌ ပယ်ဖျက်မည်':
